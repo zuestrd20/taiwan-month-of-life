@@ -8,3 +8,4 @@
 
 #countyLabels{pointer-events:none}.mobile-map-hint{display:none}
 @media(max-width:720px){.county-label{font-size:19px}.county-label[data-name="臺北市"],.county-label[data-name="基隆市"],.county-label[data-name="新竹市"],.county-label[data-name="嘉義市"]{display:none}.inset-label{font-size:18px}.mobile-map-hint{display:block;font-size:11px;color:var(--muted);margin:0;padding:5px 18px 12px}.map-footnote{position:static;padding:6px 16px 10px;font-size:10px}.map-wrap{display:block}.map-footnote span:last-child{max-width:100%}.stat-source,.daily-summary>p:last-child,.side-panel blockquote span,.timeline-note,.event-card .date-note{font-size:10px}}
+@media(max-width:720px){.intro{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:12px}.intro h1{font-size:27px;letter-spacing:.035em}.month-note{min-width:0}.month-note p{font-size:8px}}
