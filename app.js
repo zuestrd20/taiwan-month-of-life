@@ -1,8 +1,10 @@
+import {createBubbleQueue,placeBubbles} from './bubbles.js';
 import {SEED,SIMULATION_LABEL,random,createSimulation,totals,filterEvents,validateEvents,normalizeDay} from './simulation.js';
 const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
 const CATEGORIES={rescue:'救援',community:'互助',culture:'文化',nature:'自然',accident:'意外',violence:'暴力'};
 const format=n=>n===null?'未提供':n.toLocaleString('zh-TW');
 const state={day:1,county:'all',categories:Object.keys(CATEGORIES),births:true,deaths:true,news:true,playing:false,speed:2,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches};
+let bubbleQueue=createBubbleQueue({limit:4,lifetime:5800,gap:680}), bubbleKey='',bubbleSignature='',bubbleNodes=new Map(),bubbleHover=false;
 let population,geometry,eventData,simulation,particles=[],last=0,elapsed=0,toastTimer;
 const svg=(tag,attrs={},parent)=>{const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);if(parent)parent.append(el);return el;};
 function text(tag,value,className){const el=document.createElement(tag);el.textContent=value;if(className)el.className=className;return el;}
@@ -21,6 +23,50 @@ function buildMap(){
  const bounds=p.getBBox(),rng=random(`${SEED}:positions:${f.name}`),c=simulation.find(c=>c.name===f.name);for(const type of ['births','deaths']){const count=Math.min(8,Math.max(1,Math.ceil(Math.sqrt(c[type]||0)/6)));for(let i=0;i<count;i++){let pt={x:f.anchor[0],y:f.anchor[1]};for(let n=0;n<120;n++){const candidate=new DOMPoint(bounds.x+rng()*bounds.width,bounds.y+rng()*bounds.height);if(p.isPointInFill(candidate)){pt=candidate;break;}}const circle=svg('circle',{cx:pt.x,cy:pt.y,r:1.5+rng()*1.7,fill:type==='births'?'#e2f2c3':'#ddd1ee',opacity:.5,'clip-path':`url(#clip-${f.code})`},$('particles'));particles.push({circle,county:f.name,type,x:pt.x,y:pt.y,phase:rng()*Math.PI*2,r:1.5+rng()*1.7});}}
  }
 }
+
+// The queue is a visual daily sample, never an individual person or an exact event clock.
+function bubbleItems(){
+ const news=currentEvents().filter(e=>Number(e.date.slice(-2))===state.day).map(e=>({id:e.id,kind:'news',county:e.county,title:e.title,meta:`真實新聞 · ${CATEGORIES[e.category]} · 8/${state.day}`,event:e}));
+ const counties=filtered(), life=[];
+ for(let i=0;i<counties.length;i++){const c=counties[(i+state.day*7)%counties.length];for(const type of ['births','deaths']){const n=c[type==='births'?'dailyBirths':'dailyDeaths']?.[state.day-1];if(state[type]&&n>0)life.push({id:`${state.day}-${c.name}-${type}`,kind:type,county:c.name,title:`${type==='births'?'出生':'死亡'}登記分配 ${n} 人`,meta:`模擬 · 8/${state.day} · 日彙總`,count:n});}}
+ // Alternate life types and counties instead of flooding the map with 44 cards.
+ return [...news,...life.filter((_,i)=>i%3===0).slice(0,4)];
+}
+function syncBubbles(){
+ const key=JSON.stringify([state.day,state.county,state.births,state.deaths,state.news,[...state.categories].sort()]);
+ if(key!==bubbleKey){bubbleHover=false;bubbleKey=key;bubbleQueue.reset(bubbleItems());bubbleSignature='';elapsed=0;}
+ $('bubbleState').textContent=state.playing?'正在回放 · 點泡泡停下閱讀':'已暫停 · 點泡泡閱讀';
+ $('bubbleLayer').classList.toggle('paused',!state.playing||bubbleHover);
+ paintBubbles();
+}
+function showBubbleDetail(item){
+ state.playing=false;saveURL();render();
+ $('bubbleDetailBody').replaceChildren();const body=$('bubbleDetailBody');
+ $('bubbleDetailTitle').textContent=item.title;
+ body.append(text('p',`${item.county} · ${item.meta}`,'detail-meta'));
+ if(item.event){const e=item.event;body.append(text('p',e.summary),text('p',`事件 ${e.date} · 報導 ${e.publishedDate} · ${e.time?e.time+'（臺灣時間）':'日內時間未詳'}`),text('p','地圖只標示縣市示意位置，並非實際事件地點。'));if(e.dateNote)body.append(text('p',e.dateNote));body.append(link(`${e.sourceName} · 閱讀來源 ↗`,e.url));}
+ else{body.append(text('p','模擬日彙總，不是一位人物的生命故事。數字由官方縣市月度戶籍登記總數，以固定種子分配至每日。'),text('p','登記日與戶籍地不等於實際發生日與地點。光點與泡泡位置均為示意，沒有個人紀錄或地址。'),link('查看官方統計來源 ↗',population.sources[0].url));}
+ $('bubbleDetail').showModal();
+}
+function paintBubbles(){
+ const wrap=$('bubbleLayer'), box=wrap.getBoundingClientRect(),map=$('map'),matrix=map.getScreenCTM();if(!matrix||!box.width)return;
+ const active=bubbleQueue.snapshot().slice(0,box.width<500?2:4);
+ const signature=active.map(x=>x.id).join('|')+':'+Math.round(box.width)+':'+Math.round(box.height);
+ if(signature===bubbleSignature)return;bubbleSignature=signature;
+ const toLocal=([x,y])=>{const p=new DOMPoint(x,y).matrixTransform(matrix);return{x:p.x-box.left,y:p.y-box.top};};
+ const items=active.map(item=>{const f=geometry.features.find(f=>f.name===item.county);const point=item.kind==='news'?f.anchor:(particles.find(p=>p.county===item.county&&p.type===item.kind)||{x:f.anchor[0],y:f.anchor[1]});return {...item,anchor:toLocal(Array.isArray(point)?point:[point.x,point.y])};});
+ const obstacles=[...$('countyLabels').querySelectorAll('text')].filter(el=>getComputedStyle(el).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.left-box.left-3,y:r.top-box.top-2,width:r.width+6,height:r.height+4};});
+ const placed=placeBubbles(items,{width:box.width,height:box.height,cardWidth:box.width<500?156:186,cardHeight:104,obstacles});
+ const keep=new Set(placed.map(x=>x.id));for(const[id,node]of bubbleNodes)if(!keep.has(id)){node.remove();bubbleNodes.delete(id);}
+ $('bubbleTails').replaceChildren();$('bubbleTails').setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);
+ for(const item of placed){let b=bubbleNodes.get(item.id);if(!b){b=text('button','','event-bubble '+item.kind);b.dataset.bubbleId=item.id;b.append(text('span',item.meta,'bubble-meta'),text('strong',item.title),text('span',`${item.county} · ${item.kind==='news'?'縣市示意':'位置模擬'} ↗`,'bubble-place'));b.onclick=()=>showBubbleDetail(item);b.onpointerenter=()=>{bubbleHover=true;wrap.classList.add('paused');};b.onpointerleave=()=>{bubbleHover=false;wrap.classList.toggle('paused',!state.playing);};b.onfocus=()=>{bubbleHover=true;};b.onblur=()=>{bubbleHover=false;};wrap.append(b);bubbleNodes.set(item.id,b);}
+ b.style.left=item.x+'px';b.style.top=item.y+'px';b.style.width=item.width+'px';b.style.height=item.height+'px';
+ const endX=Math.max(item.x+12,Math.min(item.x+item.width-12,item.anchor.x)),endY=item.anchor.y<item.y?item.y:item.y+item.height;
+ svg('path',{d:`M${item.anchor.x},${item.anchor.y} L${endX},${endY}`,class:'bubble-tail '+item.kind},$('bubbleTails'));
+ svg('circle',{cx:item.anchor.x,cy:item.anchor.y,r:4,class:'bubble-anchor '+item.kind},$('bubbleTails'));
+ }
+}
+
 function filtered(){return simulation.filter(c=>state.county==='all'||c.name===state.county);}
 function currentEvents(){return state.news?filterEvents(eventData.events,state):[];}
 function renderMarkers(events){$('newsMarkers').replaceChildren();const groups=new Map();for(const e of events){if(!groups.has(e.county))groups.set(e.county,[]);groups.get(e.county).push(e);}for(const[name,list]of groups){const f=geometry.features.find(f=>f.name===name);if(!f)continue;const[x,y]=f.anchor;const g=svg('g',{tabindex:0,role:'button','aria-label':`${name}，${list.length}則真實新聞；縣市示意，非實際位置`},$('newsMarkers'));svg('path',{d:`M${x},${y-9}l8,9 -8,9 -8,-9Z`,class:'news-marker'},g);svg('title',{},g).textContent=`${name}：${list.length} 則真實新聞，縣市位置示意`;const action=()=>{state.county=name;saveURL();render();$('journalTitle').focus({preventScroll:true});$('journalTitle').scrollIntoView({behavior:state.reduced?'instant':'smooth',block:'start'});};g.addEventListener('click',action);g.addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();action();}});}}
@@ -31,12 +77,15 @@ function render(){const counties=filtered(),sum=totals(counties);$('county').val
  for(const[k,id]of [['births','birthLayer'],['deaths','deathLayer'],['news','newsLayer']])$(id).checked=state[k];$('reducedMotion').checked=state.reduced;document.body.classList.toggle('reduced-motion',state.reduced);document.documentElement.classList.toggle('reduced-motion',state.reduced);$('play').innerHTML=state.playing?'Ⅱ <span>暫停回放</span>':'▶ <span>播放這個月</span>';$('play').setAttribute('aria-label',state.playing?'暫停月份回放':'播放月份回放');$('play').setAttribute('aria-pressed',String(state.playing));
  for(const b of $('categories').children){b.setAttribute('aria-pressed',String(state.categories.includes(b.dataset.category)));b.disabled=!state.news;}
  for(const path of $('countyPaths').querySelectorAll('.county')){path.classList.toggle('selected',path.dataset.county===state.county);path.classList.toggle('dimmed',state.county!=='all'&&path.dataset.county!==state.county);path.setAttribute('aria-pressed',String(path.dataset.county===state.county));}
- const events=currentEvents();renderMarkers(events);renderEvents(events);const daily=Array.from({length:31},(_,i)=>counties.reduce((a,c)=>a+(state.births?c.dailyBirths?.[i]||0:0)+(state.deaths?c.dailyDeaths?.[i]||0:0),0)),max=Math.max(1,...daily);$('dayBars').replaceChildren();daily.forEach((n,i)=>{const bar=document.createElement('i');bar.style.height=`${3+n/max*33}px`;if(i<state.day)bar.classList.add('active');if(events.some(e=>Number(e.date.slice(-2))===i+1))bar.classList.add('news-day');$('dayBars').append(bar);});renderParticles(0);
+ const events=currentEvents();renderMarkers(events);renderEvents(events);const daily=Array.from({length:31},(_,i)=>counties.reduce((a,c)=>a+(state.births?c.dailyBirths?.[i]||0:0)+(state.deaths?c.dailyDeaths?.[i]||0:0),0)),max=Math.max(1,...daily);$('dayBars').replaceChildren();daily.forEach((n,i)=>{const bar=document.createElement('i');bar.style.height=`${3+n/max*33}px`;if(i<state.day)bar.classList.add('active');if(events.some(e=>Number(e.date.slice(-2))===i+1))bar.classList.add('news-day');$('dayBars').append(bar);});renderParticles(0);syncBubbles();
 }
 function renderParticles(t){for(const p of particles){const visible=state[p.type]&&(state.county==='all'||p.county===state.county);p.circle.style.display=visible?'':'none';if(!visible)continue;const phase=state.reduced||!state.playing?p.phase:t/1800+p.phase;p.circle.setAttribute('opacity',(.35+.55*(Math.sin(phase)+1)/2).toFixed(2));p.circle.setAttribute('r',(p.r+(state.reduced?0:Math.sin(phase)*.6)).toFixed(2));}}
-function tick(time){const delta=last?Math.min(time-last,250):0;last=time;if(state.playing&&!document.hidden){elapsed+=delta;renderParticles(time);const interval=6000/state.speed;if(elapsed>=interval){elapsed=0;if(state.day<31){state.day++;render();}else{state.playing=false;saveURL();render();announce('八月回放完畢。謝謝你一起看見這些日常。');}}}requestAnimationFrame(tick);}
-function wire(){for(const c of population.counties){const o=text('option',c.name);o.value=c.name;$('county').append(o);}for(const[k,label]of Object.entries(CATEGORIES)){const b=text('button',label);b.dataset.category=k;b.setAttribute('aria-pressed','true');b.onclick=()=>{state.categories=state.categories.includes(k)?state.categories.filter(x=>x!==k):[...state.categories,k];saveURL();render();};$('categories').append(b);}
- $('county').onchange=e=>{state.county=e.target.value;saveURL();render();};$('day').oninput=e=>{state.day=Number(e.target.value);state.playing=false;elapsed=0;render();};$('day').onchange=saveURL;$('play').onclick=()=>{if(state.day===31&&!state.playing)state.day=1;state.playing=!state.playing;elapsed=0;saveURL();render();};$('speed').onchange=e=>state.speed=Number(e.target.value);for(const[k,id]of [['births','birthLayer'],['deaths','deathLayer'],['news','newsLayer']])$(id).onchange=e=>{state[k]=e.target.checked;saveURL();render();};$('reducedMotion').onchange=e=>{state.reduced=e.target.checked;state.playing=false;render();};$('reset').onclick=()=>{Object.assign(state,{day:1,county:'all',categories:Object.keys(CATEGORIES),births:true,deaths:true,news:true,playing:false});elapsed=0;saveURL();render();announce('已回到月初，重設縣市及所有圖層。');};$('showAll').onclick=()=>{state.day=31;state.playing=false;saveURL();render();};window.onpopstate=()=>{state.playing=false;readURL();render();};matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{state.reduced=e.matches;state.playing=false;render();});document.addEventListener('visibilitychange',()=>{last=0;});
+function tick(time){const delta=last?Math.min(time-last,250):0;last=time;if(state.playing&&!document.hidden){if(!bubbleHover)elapsed+=delta;bubbleQueue.advance(delta,{paused:bubbleHover});paintBubbles();renderParticles(time);const interval=6000/state.speed;if(elapsed>=interval){elapsed=0;if(state.day<31){state.day++;render();}else{state.playing=false;saveURL();render();announce('八月回放完畢。謝謝你一起看見這些日常。');}}}requestAnimationFrame(tick);}
+function wire(){
+ $('closeBubbleDetail').onclick=()=>$('bubbleDetail').close();$('bubbleDetail').addEventListener('close',()=>{bubbleHover=false;});
+ new ResizeObserver(()=>{bubbleSignature='';paintBubbles();}).observe($('bubbleLayer'));
+for(const c of population.counties){const o=text('option',c.name);o.value=c.name;$('county').append(o);}for(const[k,label]of Object.entries(CATEGORIES)){const b=text('button',label);b.dataset.category=k;b.setAttribute('aria-pressed','true');b.onclick=()=>{state.categories=state.categories.includes(k)?state.categories.filter(x=>x!==k):[...state.categories,k];saveURL();render();};$('categories').append(b);}
+ $('county').onchange=e=>{state.county=e.target.value;saveURL();render();};$('day').oninput=e=>{state.day=Number(e.target.value);state.playing=false;elapsed=0;render();};$('day').onchange=saveURL;$('play').onclick=()=>{if(state.day===31&&!state.playing)state.day=1;state.playing=!state.playing;elapsed=0;saveURL();render();};$('speed').onchange=e=>state.speed=Number(e.target.value);for(const[k,id]of [['births','birthLayer'],['deaths','deathLayer'],['news','newsLayer']])$(id).onchange=e=>{state[k]=e.target.checked;saveURL();render();};$('reducedMotion').onchange=e=>{state.reduced=e.target.checked;state.playing=false;render();};$('reset').onclick=()=>{Object.assign(state,{day:1,county:'all',categories:Object.keys(CATEGORIES),births:true,deaths:true,news:true,playing:false});elapsed=0;bubbleKey='';saveURL();render();announce('已回到月初，重設縣市及所有圖層。');};$('showAll').onclick=()=>{state.day=31;state.playing=false;saveURL();render();};window.onpopstate=()=>{state.playing=false;readURL();render();};matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{state.reduced=e.matches;state.playing=false;render();});document.addEventListener('visibilitychange',()=>{last=0;});
  $('downloadSimulation').onclick=()=>{const rows=[['說明','模擬分布，非真實時間或位置；官方戶籍登記月總數，非實際發生日'],['種子',SEED],['時區','Asia/Taipei'],['日期','縣市','模擬出生登記分配','模擬死亡登記分配','模擬註記']];for(const c of simulation)for(let d=1;d<=31;d++)rows.push([`2026-08-${String(d).padStart(2,'0')}`,c.name,c.dailyBirths?.[d-1]??'',c.dailyDeaths?.[d-1]??'',SIMULATION_LABEL]);const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='SIMULATED-registration-distribution-2026-08.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
  $('monthReason').textContent='本版選擇可完整核對縣市表、全國公告及村里彙總的 2026 年 8 月。9 月村里資料已出現，但本版未與縣市公告完成交叉核對，因此所有資料一致使用 8 月。查核截止：2026-10-06；不自動更新。';for(const s of population.sources){const p=text('p','');p.append(link(`${s.publisher}｜${s.title}`,s.url));$('populationSources').append(p);}const credit=text('p',population.methodology.attribution);$('populationSources').append(credit);$('mapSource').append(text('p','地圖：內政部國土測繪中心「直轄市、縣市界線」COUNTY_MOI_1090820，實際圖資版本 2020-08-20。此開放資料依政府資料開放授權條款第 1 版釋出，圖形已簡化。'),link('官方圖資', 'https://data.gov.tw/dataset/7442'),text('span',' · '),link('政府資料開放授權條款第 1 版','https://data.gov.tw/license'));
 }
