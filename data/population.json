@@ -1,0 +1,378 @@
+{
+  "month": "2026-08",
+  "monthLabel": "2026 年 8 月",
+  "rocMonth": "11508",
+  "asOf": "2026-10-06",
+  "basis": "戶籍登記日期",
+  "unit": "人",
+  "national": {
+    "births": 7492,
+    "deaths": 16470,
+    "naturalChange": -8978,
+    "population": 23224721
+  },
+  "counties": [
+    {
+      "code": "65000",
+      "name": "新北市",
+      "births": 1232,
+      "deaths": 2501,
+      "naturalChange": -1269,
+      "population": 4035947,
+      "sourceCells": {
+        "births": "H7",
+        "deaths": "K7"
+      },
+      "villageRows": 1039
+    },
+    {
+      "code": "63000",
+      "name": "臺北市",
+      "births": 809,
+      "deaths": 1600,
+      "naturalChange": -791,
+      "population": 2421830,
+      "sourceCells": {
+        "births": "H8",
+        "deaths": "K8"
+      },
+      "villageRows": 456
+    },
+    {
+      "code": "68000",
+      "name": "桃園市",
+      "births": 831,
+      "deaths": 1299,
+      "naturalChange": -468,
+      "population": 2357912,
+      "sourceCells": {
+        "births": "H9",
+        "deaths": "K9"
+      },
+      "villageRows": 529
+    },
+    {
+      "code": "66000",
+      "name": "臺中市",
+      "births": 904,
+      "deaths": 1709,
+      "naturalChange": -805,
+      "population": 2866851,
+      "sourceCells": {
+        "births": "H10",
+        "deaths": "K10"
+      },
+      "villageRows": 625
+    },
+    {
+      "code": "67000",
+      "name": "臺南市",
+      "births": 504,
+      "deaths": 1460,
+      "naturalChange": -956,
+      "population": 1846409,
+      "sourceCells": {
+        "births": "H11",
+        "deaths": "K11"
+      },
+      "villageRows": 650
+    },
+    {
+      "code": "64000",
+      "name": "高雄市",
+      "births": 806,
+      "deaths": 2077,
+      "naturalChange": -1271,
+      "population": 2707022,
+      "sourceCells": {
+        "births": "H12",
+        "deaths": "K12"
+      },
+      "villageRows": 893
+    },
+    {
+      "code": "10002",
+      "name": "宜蘭縣",
+      "births": 144,
+      "deaths": 387,
+      "naturalChange": -243,
+      "population": 448065,
+      "sourceCells": {
+        "births": "H14",
+        "deaths": "K14"
+      },
+      "villageRows": 237
+    },
+    {
+      "code": "10004",
+      "name": "新竹縣",
+      "births": 253,
+      "deaths": 330,
+      "naturalChange": -77,
+      "population": 598316,
+      "sourceCells": {
+        "births": "H15",
+        "deaths": "K15"
+      },
+      "villageRows": 193
+    },
+    {
+      "code": "10005",
+      "name": "苗栗縣",
+      "births": 152,
+      "deaths": 467,
+      "naturalChange": -315,
+      "population": 529282,
+      "sourceCells": {
+        "births": "H16",
+        "deaths": "K16"
+      },
+      "villageRows": 277
+    },
+    {
+      "code": "10007",
+      "name": "彰化縣",
+      "births": 472,
+      "deaths": 1005,
+      "naturalChange": -533,
+      "population": 1201686,
+      "sourceCells": {
+        "births": "H17",
+        "deaths": "K17"
+      },
+      "villageRows": 591
+    },
+    {
+      "code": "10008",
+      "name": "南投縣",
+      "births": 143,
+      "deaths": 397,
+      "naturalChange": -254,
+      "population": 466401,
+      "sourceCells": {
+        "births": "H18",
+        "deaths": "K18"
+      },
+      "villageRows": 263
+    },
+    {
+      "code": "10009",
+      "name": "雲林縣",
+      "births": 252,
+      "deaths": 597,
+      "naturalChange": -345,
+      "population": 646458,
+      "sourceCells": {
+        "births": "H19",
+        "deaths": "K19"
+      },
+      "villageRows": 392
+    },
+    {
+      "code": "10010",
+      "name": "嘉義縣",
+      "births": 118,
+      "deaths": 446,
+      "naturalChange": -328,
+      "population": 469622,
+      "sourceCells": {
+        "births": "H20",
+        "deaths": "K20"
+      },
+      "villageRows": 358
+    },
+    {
+      "code": "10013",
+      "name": "屏東縣",
+      "births": 268,
+      "deaths": 779,
+      "naturalChange": -511,
+      "population": 778014,
+      "sourceCells": {
+        "births": "H21",
+        "deaths": "K21"
+      },
+      "villageRows": 443
+    },
+    {
+      "code": "10014",
+      "name": "臺東縣",
+      "births": 106,
+      "deaths": 208,
+      "naturalChange": -102,
+      "population": 207626,
+      "sourceCells": {
+        "births": "H22",
+        "deaths": "K22"
+      },
+      "villageRows": 139
+    },
+    {
+      "code": "10015",
+      "name": "花蓮縣",
+      "births": 103,
+      "deaths": 302,
+      "naturalChange": -199,
+      "population": 310777,
+      "sourceCells": {
+        "births": "H23",
+        "deaths": "K23"
+      },
+      "villageRows": 178
+    },
+    {
+      "code": "10016",
+      "name": "澎湖縣",
+      "births": 44,
+      "deaths": 94,
+      "naturalChange": -50,
+      "population": 106529,
+      "sourceCells": {
+        "births": "H24",
+        "deaths": "K24"
+      },
+      "villageRows": 96
+    },
+    {
+      "code": "10017",
+      "name": "基隆市",
+      "births": 57,
+      "deaths": 308,
+      "naturalChange": -251,
+      "population": 357905,
+      "sourceCells": {
+        "births": "H25",
+        "deaths": "K25"
+      },
+      "villageRows": 157
+    },
+    {
+      "code": "10018",
+      "name": "新竹市",
+      "births": 163,
+      "deaths": 267,
+      "naturalChange": -104,
+      "population": 455783,
+      "sourceCells": {
+        "births": "H26",
+        "deaths": "K26"
+      },
+      "villageRows": 122
+    },
+    {
+      "code": "10020",
+      "name": "嘉義市",
+      "births": 85,
+      "deaths": 166,
+      "naturalChange": -81,
+      "population": 261453,
+      "sourceCells": {
+        "births": "H27",
+        "deaths": "K27"
+      },
+      "villageRows": 84
+    },
+    {
+      "code": "09020",
+      "name": "金門縣",
+      "births": 39,
+      "deaths": 68,
+      "naturalChange": -29,
+      "population": 137208,
+      "sourceCells": {
+        "births": "H29",
+        "deaths": "K29"
+      },
+      "villageRows": 37
+    },
+    {
+      "code": "09007",
+      "name": "連江縣",
+      "births": 7,
+      "deaths": 3,
+      "naturalChange": 4,
+      "population": 13625,
+      "sourceCells": {
+        "births": "H30",
+        "deaths": "K30"
+      },
+      "villageRows": 22
+    }
+  ],
+  "sources": [
+    {
+      "id": "moi-11508-counties",
+      "publisher": "內政部戶政司",
+      "title": "人口增加、自然增加、出生、死亡、結婚、離婚數及其比率統計表：115年8月",
+      "url": "https://www.ris.gov.tw/info-popudata/app/awFastDownload/view?type=xls&m4c=m0s2&d5c=11508",
+      "landingUrl": "https://www.ris.gov.tw/info-popudata/app/awFastDownload/toMain_panel",
+      "format": "xls",
+      "localFile": "raw/m0s2-11508.xls",
+      "sheet": "06-人口增加&生死結離",
+      "usage": "Primary county totals; births in column H, deaths in column K; national total in row 6. Excludes province subtotal rows.",
+      "accessedAt": "2026-10-06",
+      "sha256": "8f1ea708be8bdc8d6d24fb5baa5f014d29c333f3bfdbac18ee38d889631230e1"
+    },
+    {
+      "id": "moi-11508-villages",
+      "publisher": "內政部戶政司",
+      "title": "11508-動態資料統計表（含同婚）",
+      "url": "https://opdadm.moi.gov.tw/api/v1/no-auth/resource/api/dataset/53F23080-FC71-4479-A19C-61C61A77D1D0/resource/99439403-0AD5-42AF-BEB0-378EC3B922AE/download",
+      "landingUrl": "https://data.gov.tw/dataset/131135",
+      "format": "csv",
+      "localFile": "raw/registration-11508.csv",
+      "usage": "All 7,781 village rows aggregated by the first five digits of area code and county name; each county birth/death total exactly agrees with the county XLS.",
+      "license": "政府資料開放授權條款－第1版 (Open Government Data License, version 1.0)",
+      "licenseUrl": "https://data.gov.tw/license",
+      "accessedAt": "2026-10-06",
+      "sha256": "e07e2d12c76cc3b45fdc6cbf676e540225d359d9a42117413317d2da48e0e26c"
+    },
+    {
+      "id": "moi-11508-bulletin",
+      "publisher": "內政部戶政司",
+      "title": "民國115年8月戶口統計資料分析",
+      "url": "https://www.moi.gov.tw/News_Content.aspx?n=9&s=340734&sms=9009",
+      "publishedAt": "2026-09-10T10:00:00+08:00",
+      "usage": "National reconciliation: 7,492 births, 16,470 deaths, month-end population 23,224,721.",
+      "accessedAt": "2026-10-06"
+    },
+    {
+      "id": "registration-method",
+      "publisher": "內政部戶政司",
+      "title": "修正「戶籍人口統計作業要點」（111年12月9日發布）",
+      "url": "https://www.ris.gov.tw/info-liferay/app/channel/regulationDetail/22343496?p=2",
+      "usage": "Monthly dynamic data cover the first through last day of the month and are tabulated by event registration date.",
+      "accessedAt": "2026-10-06"
+    },
+    {
+      "id": "geographic-method",
+      "publisher": "內政部戶政司",
+      "title": "108年人口統計年刊：說明、統計列表原則",
+      "url": "https://www.ris.gov.tw/documents/data/5/2/cadd7ffc-4175-48db-b319-158870c7262d.pdf",
+      "usage": "Geographical tabulation follows household-registration residence, not the physical place of an event; registration and occurrence dates are distinct.",
+      "accessedAt": "2026-10-06"
+    }
+  ],
+  "methodology": {
+    "displayNote": "出生與死亡為 2026 年 8 月戶籍登記人數；依戶籍地統計，與實際發生日期及地點可能不同。",
+    "registrationVsOccurrence": "Counts refer to registrations accepted during 2026-08-01 through 2026-08-31, not necessarily births or deaths that occurred during those dates.",
+    "geography": "22 county/city household-registration areas, including Penghu, Kinmen and Lienchiang. Excludes province subtotal rows to prevent double counting.",
+    "aggregation": "CSV birth field: 出生數_合計. Deaths: 死亡人數_男 + 死亡人數_女. Group by county code (first 5 characters of 區域別代碼). Validate each against county XLS columns H and K.",
+    "naturalChange": "births - deaths; excludes migration and must not be described as total population change.",
+    "monthSelection": "August is the latest month present in the verified official county-table download selector and is independently reconciled to the published national bulletin. A September village CSV was already listed on 2026-10-05, but was not reconciled against a published county/national release for this edition. This map therefore uses August consistently and does not claim that no September data exist.",
+    "license": "The cross-validated village CSV dataset is licensed under the Open Government Data License, version 1.0; credit 內政部戶政司 and identify this aggregation.",
+    "attribution": "資料來源：內政部戶政司，2026，11508-動態資料統計表（含同婚）。此資料依政府資料開放授權條款第1版釋出（https://data.gov.tw/license）；本圖按縣市彙整，並與官方縣市統計表核對。"
+  },
+  "validation": {
+    "countyCount": 22,
+    "uniqueCountyCodes": 22,
+    "rawVillageRows": 7781,
+    "allRowsPeriod": "11508",
+    "all22CountiesMatchOfficialXls": true,
+    "countyBirthSum": 7492,
+    "countyDeathSum": 16470,
+    "nationalBulletinMatch": true,
+    "countyPopulationSum": 23224721,
+    "nonnegativeIntegerCounts": true
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "title": "直轄市、縣市界線(TWD97經緯度)",
+  "provider": "內政部國土測繪中心",
+  "datasetUrl": "https://data.gov.tw/dataset/7442",
+  "downloadPage": "https://maps.nlsc.gov.tw/pro/download.jsp",
+  "downloadUrl": "https://maps.nlsc.gov.tw/download/%E7%B8%A3%E5%B8%82%E7%95%8C%E7%B7%9A(TWD97%E7%B6%93%E7%B7%AF%E5%BA%A6).zip",
+  "retrievedDate": "2026-10-06",
+  "sourceRevisionDate": "2020-08-20",
+  "sourceFile": "COUNTY_MOI_1090820.shp",
+  "archiveSha256": "0c6fca34a92b92ef3e9a41957e403cb89e814bb64942ca7c7e51c746f913d49d",
+  "license": "政府資料開放授權條款－第1版 / Open Government Data License 1.0",
+  "licenseUrl": "https://data.gov.tw/license",
+  "attribution": "內政部國土測繪中心 2020 直轄市、縣市界線（COUNTY_MOI_1090820）。此開放資料依政府資料開放授權條款第1版進行公眾釋出。",
+  "modifications": [
+    "來源為 TWD97 經緯度（EPSG:3824），轉為 WGS84（EPSG:4326）。",
+    "共邊先以 0.000001 度座標精度對齊，再以 0.0025 度容差作保留拓樸的共邊簡化。",
+    "GeoJSON 保留全部 22 縣市的來源圖徵；SVG 路徑經墨卡托投影、主圖範圍篩選及離島插圖配置。",
+    "僅作互動概覽，不作測量、導航、地籍或法定界線用途。"
+  ],
+  "countyCount": 22,
+  "originalCoordinateCount": 328407,
+  "simplifiedCoordinateCount": 8933,
+  "coverageValidAfterPrecisionAndSimplification": true,
+  "cartographicNotes": [
+    "離島採分幅插圖，位置與比例經調整。",
+    "主圖顯示臺灣本島及鄰近島嶼；遠方離島未於主圖呈現。",
+    "烏坵在金門縣插圖內另作分幅。"
+  ],
+  "sourceVersionCaveat": "官方下載頁標示更新日期 2025-11-18，但實際 ZIP 內圖資與詮釋資料版本為 2020-08-20；本成果依實際檔案版本標示。"
+}
