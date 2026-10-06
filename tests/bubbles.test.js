@@ -159,3 +159,18 @@ test('impossible, obstructed, and invalid layouts skip safely without mutation',
   assert.deepEqual(placeBubbles([{anchor: {x: NaN, y: 2}}, {}], {width: 300, height: 300}), []);
   assert.deepEqual(input, before);
 });
+
+test('short-tail option skips distant placements rather than drawing long connectors', () => {
+ const items=[{id:'news',anchor:{x:200,y:200}}];
+ const near=placeBubbles(items,{width:500,height:400,cardWidth:100,cardHeight:78,maxTailDistance:34});
+ assert.equal(near.length,1);
+ for(const p of near)assert.ok(Math.hypot(p.connector.x2-p.anchor.x,p.connector.y2-p.anchor.y)<=34);
+ const blocked=placeBubbles(items,{width:500,height:400,cardWidth:100,cardHeight:78,maxTailDistance:34,obstacles:[{x:145,y:145,width:110,height:110}]});
+ assert.equal(blocked.length,0);
+});
+
+test('compact phone balloon fits beside Penghu without a long tail or hiding labels',()=>{
+ const obstacles=[[21.817,78.988,64.208,16.667],[21.817,169.003,64.208,16.667],[181.741,125.426,34.38,17.333],[185.969,100.966,34.38,17.333]].map(([x,y,width,height])=>({x,y,width,height}));
+ const placed=placeBubbles([{id:'news',anchor:{x:63.879,y:112.65}}],{width:350.33,height:357.79,cardWidth:80,cardHeight:64,maxTailDistance:34,obstacles});
+ assert.equal(placed.length,1);assertBounds(placed,350.33,357.79);for(const r of obstacles)assert(!overlap(placed[0],r));
+});

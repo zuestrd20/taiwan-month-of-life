@@ -71,7 +71,7 @@ const validRect = rect => rect && ['x', 'y', 'width', 'height'].every(key => Num
  * is preserved; an item is omitted when no collision-free candidate fits.
  * connector starts at the unchanged geographic anchor and ends at a card edge.
  */
-export function placeBubbles(items, {width, height, cardWidth = 180, cardHeight = 88, obstacles = []} = {}) {
+export function placeBubbles(items, {width, height, cardWidth = 180, cardHeight = 88, obstacles = [], maxTailDistance = Infinity} = {}) {
   const padding = 8, gutter = 8, offset = 18;
   if (![width, height, cardWidth, cardHeight].every(Number.isFinite) ||
       width <= padding * 2 || height <= padding * 2 || cardWidth <= 0 || cardHeight <= 0) return [];
@@ -103,6 +103,7 @@ export function placeBubbles(items, {width, height, cardWidth = 180, cardHeight 
         if (overlaps(rect, anchorBox) || occupied.some(other => overlaps(rect, other, gutter))) continue;
         const endX = clamp(anchor.x, x, x + w), endY = clamp(anchor.y, y, y + h);
         const edgeDistance = (endX - anchor.x) ** 2 + (endY - anchor.y) ** 2;
+        if (edgeDistance > maxTailDistance ** 2) continue;
         const centerDistance = (x + w / 2 - anchor.x) ** 2 + (y + h / 2 - anchor.y) ** 2;
         candidates.push({...rect, score: edgeDistance + centerDistance * 0.05, endX, endY});
       }

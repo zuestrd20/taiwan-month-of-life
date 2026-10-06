@@ -30,7 +30,7 @@ function bubbleItems(){
  const counties=filtered(), life=[];
  for(let i=0;i<counties.length;i++){const c=counties[(i+state.day*7)%counties.length];for(const type of ['births','deaths']){const n=c[type==='births'?'dailyBirths':'dailyDeaths']?.[state.day-1];if(state[type]&&n>0)life.push({id:`${state.day}-${c.name}-${type}`,kind:type,county:c.name,title:`${type==='births'?'出生':'死亡'}登記分配 ${n} 人`,meta:`模擬 · 8/${state.day} · 日彙總`,count:n});}}
  // Alternate life types and counties instead of flooding the map with 44 cards.
- return [...news,...life.filter((_,i)=>i%3===0).slice(0,4)];
+ return [...news,...(counties.length===1?life:life.filter((_,i)=>i%3===0)).slice(0,4)];
 }
 function syncBubbles(){
  const key=JSON.stringify([state.day,state.county,state.births,state.deaths,state.news,[...state.categories].sort()]);
@@ -50,19 +50,22 @@ function showBubbleDetail(item){
 }
 function paintBubbles(){
  const wrap=$('bubbleLayer'), box=wrap.getBoundingClientRect(),map=$('map'),matrix=map.getScreenCTM();if(!matrix||!box.width)return;
- const active=bubbleQueue.snapshot().slice(0,box.width<500?2:4);
+ const active=bubbleQueue.snapshot();
  const signature=active.map(x=>x.id).join('|')+':'+Math.round(box.width)+':'+Math.round(box.height);
  if(signature===bubbleSignature)return;bubbleSignature=signature;
  const toLocal=([x,y])=>{const p=new DOMPoint(x,y).matrixTransform(matrix);return{x:p.x-box.left,y:p.y-box.top};};
  const items=active.map(item=>{const f=geometry.features.find(f=>f.name===item.county);const point=item.kind==='news'?f.anchor:(particles.find(p=>p.county===item.county&&p.type===item.kind)||{x:f.anchor[0],y:f.anchor[1]});return {...item,anchor:toLocal(Array.isArray(point)?point:[point.x,point.y])};});
  const obstacles=[...$('countyLabels').querySelectorAll('text')].filter(el=>getComputedStyle(el).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {x:r.left-box.left-3,y:r.top-box.top-2,width:r.width+6,height:r.height+4};});
- const placed=placeBubbles(items,{width:box.width,height:box.height,cardWidth:box.width<500?156:186,cardHeight:104,obstacles});
+ const placed=placeBubbles(items,{width:box.width,height:box.height,cardWidth:box.width<500?80:112,cardHeight:box.width<500?64:78,obstacles,maxTailDistance:34}).slice(0,box.width<500?2:4);
  const keep=new Set(placed.map(x=>x.id));for(const[id,node]of bubbleNodes)if(!keep.has(id)){node.remove();bubbleNodes.delete(id);}
  $('bubbleTails').replaceChildren();$('bubbleTails').setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);
- for(const item of placed){let b=bubbleNodes.get(item.id);if(!b){b=text('button','','event-bubble '+item.kind);b.dataset.bubbleId=item.id;b.append(text('span',item.meta,'bubble-meta'),text('strong',item.title),text('span',`${item.county} · ${item.kind==='news'?'縣市示意':'位置模擬'} ↗`,'bubble-place'));b.onclick=()=>showBubbleDetail(item);b.onpointerenter=()=>{bubbleHover=true;wrap.classList.add('paused');};b.onpointerleave=()=>{bubbleHover=false;wrap.classList.toggle('paused',!state.playing);};b.onfocus=()=>{bubbleHover=true;};b.onblur=()=>{bubbleHover=false;};wrap.append(b);bubbleNodes.set(item.id,b);}
+ for(const item of placed){let b=bubbleNodes.get(item.id);if(!b){b=text('button','','event-bubble '+item.kind);b.dataset.bubbleId=item.id;b.setAttribute('aria-label',`${item.county} · ${item.meta} · ${item.title}，點選詳情`);b.title=`${item.county} · ${item.title} · 位置示意`;b.append(text('strong',item.kind==='news'?CATEGORIES[item.event.category]:item.kind==='births'?'出生':'告別'),text('span',`${item.kind==='news'?'新聞':'模擬'} · 8/${state.day}`,'bubble-meta'));b.onclick=()=>showBubbleDetail(item);b.onpointerenter=()=>{bubbleHover=true;wrap.classList.add('paused');};b.onpointerleave=()=>{bubbleHover=false;wrap.classList.toggle('paused',!state.playing);};b.onfocus=()=>{bubbleHover=true;};b.onblur=()=>{bubbleHover=false;};wrap.append(b);bubbleNodes.set(item.id,b);}
  b.style.left=item.x+'px';b.style.top=item.y+'px';b.style.width=item.width+'px';b.style.height=item.height+'px';
- const endX=Math.max(item.x+12,Math.min(item.x+item.width-12,item.anchor.x)),endY=item.anchor.y<item.y?item.y:item.y+item.height;
- svg('path',{d:`M${item.anchor.x},${item.anchor.y} L${endX},${endY}`,class:'bubble-tail '+item.kind},$('bubbleTails'));
+ const {x2:endX,y2:endY}=item.connector;
+ const horizontal=endX===item.x||endX===item.x+item.width;
+ const a=horizontal?[endX,Math.max(item.y+15,Math.min(item.y+item.height-15,endY))-7]:[Math.max(item.x+15,Math.min(item.x+item.width-15,endX))-7,endY];
+ const tipB=horizontal?[endX,a[1]+14]:[a[0]+14,endY];
+ svg('path',{d:`M${a[0]},${a[1]} L${item.anchor.x},${item.anchor.y} L${tipB[0]},${tipB[1]} Z`,class:'bubble-tail '+item.kind},$('bubbleTails'));
  svg('circle',{cx:item.anchor.x,cy:item.anchor.y,r:4,class:'bubble-anchor '+item.kind},$('bubbleTails'));
  }
 }
